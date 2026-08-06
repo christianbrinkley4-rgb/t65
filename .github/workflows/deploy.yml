@@ -1,0 +1,46 @@
+# Publishes the static site that is already committed to this repo.
+#
+# Nothing is BUILT here. The build happens in the source repo
+# (christianbrinkley4-rgb/t65-command-center) via `npm run build:deploy`, which
+# is the only thing that sets the /t65 asset prefix correctly — a bare
+# `next build` produces a site that looks fine and hangs on "Loading…" in
+# production. This repo only ever receives the finished `out/` directory.
+#
+# Replaces the old "deploy from a branch" (legacy Jekyll) publish, which started
+# failing with a bare "Page build failed." and no log to work from. This path
+# gives a real run log when something breaks.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # So a publish can be re-run from the Actions tab without an empty commit.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Two deploys must never race. The newest push is the one that should win.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      # Uploads the repo root as-is. .git and .github are excluded by the
+      # action; .nojekyll is not, and must stay, or Pages drops _next/ and the
+      # site loads with no JS at all.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
