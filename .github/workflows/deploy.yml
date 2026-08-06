@@ -22,10 +22,13 @@ permissions:
   pages: write
   id-token: write
 
-# Two deploys must never race. The newest push is the one that should win.
+# One publish at a time, but never kill one that is already running: a
+# half-cancelled Pages deployment is how you get "Deployment cancelled." on the
+# next run and a site stuck on the previous build. Queued runs in between are
+# skipped; the in-flight one is allowed to finish.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
