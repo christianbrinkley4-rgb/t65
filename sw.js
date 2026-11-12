@@ -22,7 +22,18 @@
 // Bump this on every deploy. The activate handler deletes every cache whose
 // name doesn't match, which is what forces a phone that already has the app
 // installed to pick up the new build instead of serving the old shell.
-const CACHE = "t65-app-v43";
+const CACHE = "t65-app-v44";
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const url = new URL("calendar/", self.registration.scope).href;
+    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    const app = windows.find((client) => client.url.startsWith(self.registration.scope));
+    if (app) { await app.navigate(url); await app.focus(); }
+    else await self.clients.openWindow(url);
+  })());
+});
 
 self.addEventListener("install", (event) => {
   // Take over as soon as possible; a half-updated shell is a field bug.
