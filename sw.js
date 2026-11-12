@@ -22,7 +22,7 @@
 // Bump this on every deploy. The activate handler deletes every cache whose
 // name doesn't match, which is what forces a phone that already has the app
 // installed to pick up the new build instead of serving the old shell.
-const CACHE = "t65-app-v44";
+const CACHE = "t65-app-v45";
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
